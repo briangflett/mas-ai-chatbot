@@ -24,11 +24,13 @@ export async function middleware(request: NextRequest) {
   });
 
   if (!token) {
-    const redirectUrl = encodeURIComponent(request.url);
-
-    return NextResponse.redirect(
-      new URL(`/api/auth/guest?redirectUrl=${redirectUrl}`, request.url),
-    );
+    // Allow access to auth pages and onboarding without tokens
+    const allowedPaths = ['/onboarding', '/login', '/register'];
+    const isAllowedPath = allowedPaths.includes(pathname) || pathname.startsWith('/api/');
+    
+    if (!isAllowedPath) {
+      return NextResponse.redirect(new URL('/onboarding', request.url));
+    }
   }
 
   const isGuest = guestRegex.test(token?.email ?? '');
@@ -47,6 +49,7 @@ export const config = {
     '/api/:path*',
     '/login',
     '/register',
+    '/onboarding',
 
     /*
      * Match all request paths except for the ones starting with:

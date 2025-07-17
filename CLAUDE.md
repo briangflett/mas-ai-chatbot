@@ -17,7 +17,7 @@ This is a Next.js AI chatbot application built with the AI SDK that provides con
 
 ```bash
 # Development
-pnpm dev                 # Start development server on port 3000 with turbo
+./dev-manager.sh start mas-ai-chatbot # Start development server on port 3000 with turbo, don't use pnpm dev.
 pnpm build              # Run database migrations and build for production
 pnpm start              # Start production server
 

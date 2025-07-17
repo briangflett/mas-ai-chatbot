@@ -4,12 +4,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { toast } from '@/components/toast';
+import { signIn, useSession } from 'next-auth/react';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Lock, Mail, User } from 'lucide-react';
 
 import { AuthForm } from '@/components/auth-form';
 import { SubmitButton } from '@/components/submit-button';
 
 import { login, type LoginActionState } from '../actions';
-import { useSession } from 'next-auth/react';
 
 export default function Page() {
   const router = useRouter();
@@ -24,7 +27,7 @@ export default function Page() {
     },
   );
 
-  const { update: updateSession } = useSession();
+  const { data: session, update: updateSession } = useSession();
 
   useEffect(() => {
     if (state.status === 'failed') {
@@ -44,23 +47,90 @@ export default function Page() {
     }
   }, [state.status]);
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (session) {
+      router.push('/');
+    }
+  }, [session, router]);
+
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get('email') as string);
     formAction(formData);
   };
 
+  if (session) {
+    return (
+      <div className="flex h-dvh w-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-sm text-gray-600">Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-dvh w-screen items-start pt-12 md:pt-0 md:items-center justify-center bg-background">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl flex flex-col gap-12">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl flex flex-col gap-8">
         <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">
           <h3 className="text-xl font-semibold dark:text-zinc-50">Sign In</h3>
           <p className="text-sm text-gray-500 dark:text-zinc-400">
-            Use your email and password to sign in
+            Choose your preferred sign-in method
           </p>
         </div>
-        <AuthForm action={handleSubmit} defaultEmail={email}>
-          <SubmitButton isSuccessful={isSuccessful}>Sign in</SubmitButton>
-          <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
+
+        {/* Primary Login for MAS Staff/VCs */}
+        <div className="px-4 sm:px-16">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <p className="text-sm text-blue-700 mb-2 font-medium">
+              MAS Staff & Volunteer Consultants
+            </p>
+            <p className="text-xs text-blue-600 mb-3">
+              Sign in with your Microsoft account for enhanced access to VC Templates and Project History
+            </p>
+            <Button
+              onClick={() => signIn('azure-ad')}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6"
+            >
+              <Lock className="w-5 h-5 mr-2" />
+              Continue with Microsoft
+            </Button>
+          </div>
+        </div>
+
+        {/* Guest Access */}
+        <div className="px-4 sm:px-16">
+          <Button
+            onClick={() => signIn('guest')}
+            variant="outline"
+            className="w-full flex items-center gap-3 py-6"
+          >
+            <User className="w-5 h-5" />
+            Continue as Guest
+          </Button>
+        </div>
+
+        <div className="px-4 sm:px-16">
+          <Separator className="relative">
+            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
+              or
+            </span>
+          </Separator>
+        </div>
+
+        {/* Email/Password Form */}
+        <div className="px-4 sm:px-16">
+          <AuthForm action={handleSubmit} defaultEmail={email}>
+            <SubmitButton isSuccessful={isSuccessful}>
+              <Mail className="w-4 h-4 mr-2" />
+              Sign in with Email
+            </SubmitButton>
+          </AuthForm>
+        </div>
+
+        <div className="px-4 sm:px-16">
+          <p className="text-center text-sm text-gray-600 dark:text-zinc-400">
             {"Don't have an account? "}
             <Link
               href="/register"
@@ -70,7 +140,7 @@ export default function Page() {
             </Link>
             {' for free.'}
           </p>
-        </AuthForm>
+        </div>
       </div>
     </div>
   );

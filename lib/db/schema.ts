@@ -15,6 +15,20 @@ export const user = pgTable('User', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   email: varchar('email', { length: 64 }).notNull(),
   password: varchar('password', { length: 64 }),
+  // Onboarding fields
+  role: varchar('role', { length: 50 }),
+  customRole: text('customRole'),
+  topic: varchar('topic', { length: 50 }),
+  customTopic: text('customTopic'),
+  identification: varchar('identification', { length: 50 }),
+  dataAccess: json('dataAccess').$type<string[]>(),
+  microsoftSession: json('microsoftSession').$type<{
+    name?: string;
+    email?: string;
+    accessToken?: string;
+  }>(),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 });
 
 export type User = InferSelectModel<typeof user>;

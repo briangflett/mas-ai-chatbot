@@ -53,6 +53,18 @@ export async function getUser(email: string): Promise<Array<User>> {
   }
 }
 
+export async function getUserById(id: string): Promise<User | null> {
+  try {
+    const [selectedUser] = await db.select().from(user).where(eq(user.id, id));
+    return selectedUser || null;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get user by id',
+    );
+  }
+}
+
 export async function createUser(email: string, password: string) {
   const hashedPassword = generateHashedPassword(password);
 
@@ -60,6 +72,49 @@ export async function createUser(email: string, password: string) {
     return await db.insert(user).values({ email, password: hashedPassword });
   } catch (error) {
     throw new ChatSDKError('bad_request:database', 'Failed to create user');
+  }
+}
+
+export async function updateUserOnboarding({
+  userId,
+  role,
+  customRole,
+  topic,
+  customTopic,
+  identification,
+  dataAccess,
+  microsoftSession,
+}: {
+  userId: string;
+  role: string;
+  customRole?: string;
+  topic: string;
+  customTopic?: string;
+  identification: string;
+  dataAccess: string[];
+  microsoftSession?: {
+    name?: string;
+    email?: string;
+    accessToken?: string;
+  };
+}) {
+  try {
+    return await db
+      .update(user)
+      .set({
+        role,
+        customRole,
+        topic,
+        customTopic,
+        identification,
+        dataAccess,
+        microsoftSession,
+        updatedAt: new Date(),
+      })
+      .where(eq(user.id, userId))
+      .returning();
+  } catch (error) {
+    throw new ChatSDKError('bad_request:database', 'Failed to update user onboarding');
   }
 }
 
