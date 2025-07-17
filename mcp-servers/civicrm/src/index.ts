@@ -5,9 +5,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-  Tool,
+  type Tool,
 } from "@modelcontextprotocol/sdk/types.js";
-import { CiviCRMClient, CiviCRMConfig } from "./civicrm-client.js";
+import { CiviCRMClient, type CiviCRMConfig } from "./civicrm-client.js";
 import * as dotenv from 'dotenv';
 
 dotenv.config();

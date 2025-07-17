@@ -528,7 +528,7 @@ export function Onboarding() {
         ) : (
           /* Transition State */
           <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-6"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-6" />
             <h3 className="text-xl font-semibold text-gray-800 mb-2">
               Initializing your AI assistant...
             </h3>

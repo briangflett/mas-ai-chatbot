@@ -92,6 +92,35 @@ export const {
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      // For Azure AD users, ensure they exist in our database
+      if (account?.provider === 'azure-ad' && user.email) {
+        try {
+          const existingUsers = await getUser(user.email);
+          if (existingUsers.length === 0) {
+            // Create user in database
+            const { createUser } = await import('@/lib/db/queries');
+            const newUser = await createUser(user.email, ''); // No password for OAuth users
+            if (newUser && newUser.length > 0) {
+              console.log('✅ Created new Azure AD user in database:', { id: newUser[0].id, email: user.email });
+              // Update the user object with the database ID
+              user.id = newUser[0].id;
+            } else {
+              console.error('❌ Failed to create user - no user returned');
+              return false;
+            }
+          } else {
+            // Use existing user ID
+            user.id = existingUsers[0].id;
+            console.log('✅ Found existing Azure AD user in database:', { id: user.id, email: user.email });
+          }
+        } catch (error) {
+          console.error('❌ Error creating/finding Azure AD user:', error);
+          return false; // Prevent sign in if we can't create/find user
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id as string;

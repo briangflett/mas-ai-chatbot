@@ -1,8 +1,8 @@
-"use strict";
+
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CiviCRMClient = void 0;
-const util_1 = require("util");
-const child_process_1 = require("child_process");
+const util_1 = require("node:util");
+const child_process_1 = require("node:child_process");
 const execAsync = (0, util_1.promisify)(child_process_1.exec);
 class CiviCRMClient {
     constructor(config) {
@@ -27,7 +27,7 @@ class CiviCRMClient {
             }
             // Parse the output
             if (action === 'getcount') {
-                return { result: parseInt(stdout.trim()) };
+                return { result: Number.parseInt(stdout.trim()) };
             }
             try {
                 const result = JSON.parse(stdout.trim());
@@ -112,8 +112,8 @@ class CiviCRMClient {
         });
         const contributions = result;
         const total = contributions.reduce((sum, contrib) => {
-            const amount = parseFloat(contrib.total_amount?.toString() || '0');
-            return sum + (isNaN(amount) ? 0 : amount);
+            const amount = Number.parseFloat(contrib.total_amount?.toString() || '0');
+            return sum + (Number.isNaN(amount) ? 0 : amount);
         }, 0);
         const completed = contributions.filter(c => c.contribution_status === 'Completed').length;
         return {
@@ -145,7 +145,7 @@ class CiviCRMClient {
         return result;
     }
     // Case management operations
-    async getCases(limit = 25, offset = 0, statusFilter, dateFilter) {
+    async getCases(limit, offset, statusFilter, dateFilter) {
         const where = [['is_deleted', '=', false]];
         if (statusFilter) {
             where.push(['status_id', '=', statusFilter]);
@@ -170,17 +170,17 @@ class CiviCRMClient {
         ]);
         const caseTypeMap = new Map();
         caseTypes.forEach((type) => {
-            caseTypeMap.set(parseInt(type.id), type.title);
+            caseTypeMap.set(Number.parseInt(type.id), type.title);
         });
         const statusMap = new Map();
         caseStatuses.forEach((status) => {
-            statusMap.set(parseInt(status.value), status.label);
+            statusMap.set(Number.parseInt(status.value), status.label);
         });
         // Enrich cases with type and status names
         return cases.map(caseItem => ({
             ...caseItem,
-            case_type: caseTypeMap.get(parseInt(caseItem.case_type_id.toString())) || 'Unknown',
-            status: statusMap.get(parseInt(caseItem.status_id.toString())) || 'Unknown',
+            case_type: caseTypeMap.get(Number.parseInt(caseItem.case_type_id.toString())) || 'Unknown',
+            status: statusMap.get(Number.parseInt(caseItem.status_id.toString())) || 'Unknown',
         }));
     }
     async getCaseById(caseId) {
@@ -338,17 +338,17 @@ class CiviCRMClient {
         ]);
         const typeMap = new Map();
         activityTypes.forEach((type) => {
-            typeMap.set(parseInt(type.value), type.label);
+            typeMap.set(Number.parseInt(type.value), type.label);
         });
         const statusMap = new Map();
         activityStatuses.forEach((status) => {
-            statusMap.set(parseInt(status.value), status.label);
+            statusMap.set(Number.parseInt(status.value), status.label);
         });
         // Enrich activities
         return activities.map(activity => ({
             ...activity,
-            activity_type: typeMap.get(parseInt(activity.activity_type_id.toString())) || 'Unknown',
-            status: statusMap.get(parseInt(activity.status_id.toString())) || 'Unknown',
+            activity_type: typeMap.get(Number.parseInt(activity.activity_type_id.toString())) || 'Unknown',
+            status: statusMap.get(Number.parseInt(activity.status_id.toString())) || 'Unknown',
         }));
     }
     async getOpenCasesByCoordinator(coordinatorId) {

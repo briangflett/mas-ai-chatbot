@@ -1,6 +1,6 @@
-import { spawn } from 'child_process';
-import { promisify } from 'util';
-import { exec } from 'child_process';
+
+import { promisify } from 'node:util';
+import { exec } from 'node:child_process';
 
 const execAsync = promisify(exec);
 
@@ -127,7 +127,7 @@ export class CiviCRMClient {
       
       // Parse the output
       if (action === 'getcount') {
-        return { result: parseInt(stdout.trim()) };
+        return { result: Number.parseInt(stdout.trim()) };
       }
       
       try {
@@ -219,8 +219,8 @@ export class CiviCRMClient {
     
     const contributions = result as CiviCRMContribution[];
     const total = contributions.reduce((sum, contrib) => {
-      const amount = parseFloat(contrib.total_amount?.toString() || '0');
-      return sum + (isNaN(amount) ? 0 : amount);
+      const amount = Number.parseFloat(contrib.total_amount?.toString() || '0');
+      return sum + (Number.isNaN(amount) ? 0 : amount);
     }, 0);
     const completed = contributions.filter(c => c.contribution_status === 'Completed').length;
     
@@ -287,19 +287,19 @@ export class CiviCRMClient {
 
     const caseTypeMap = new Map();
     caseTypes.forEach((type: any) => {
-      caseTypeMap.set(parseInt(type.id), type.title);
+      caseTypeMap.set(Number.parseInt(type.id), type.title);
     });
 
     const statusMap = new Map();
     caseStatuses.forEach((status: any) => {
-      statusMap.set(parseInt(status.value), status.label);
+      statusMap.set(Number.parseInt(status.value), status.label);
     });
 
     // Enrich cases with type and status names
     return cases.map(caseItem => ({
       ...caseItem,
-      case_type: caseTypeMap.get(parseInt(caseItem.case_type_id.toString())) || 'Unknown',
-      status: statusMap.get(parseInt(caseItem.status_id.toString())) || 'Unknown',
+      case_type: caseTypeMap.get(Number.parseInt(caseItem.case_type_id.toString())) || 'Unknown',
+      status: statusMap.get(Number.parseInt(caseItem.status_id.toString())) || 'Unknown',
     }));
   }
 
@@ -489,19 +489,19 @@ export class CiviCRMClient {
 
     const typeMap = new Map();
     activityTypes.forEach((type: any) => {
-      typeMap.set(parseInt(type.value), type.label);
+      typeMap.set(Number.parseInt(type.value), type.label);
     });
 
     const statusMap = new Map();
     activityStatuses.forEach((status: any) => {
-      statusMap.set(parseInt(status.value), status.label);
+      statusMap.set(Number.parseInt(status.value), status.label);
     });
 
     // Enrich activities
     return activities.map(activity => ({
       ...activity,
-      activity_type: typeMap.get(parseInt(activity.activity_type_id.toString())) || 'Unknown',
-      status: statusMap.get(parseInt(activity.status_id.toString())) || 'Unknown',
+      activity_type: typeMap.get(Number.parseInt(activity.activity_type_id.toString())) || 'Unknown',
+      status: statusMap.get(Number.parseInt(activity.status_id.toString())) || 'Unknown',
     }));
   }
 

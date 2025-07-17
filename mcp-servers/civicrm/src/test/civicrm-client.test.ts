@@ -13,7 +13,7 @@ describe('CiviCRMClient', () => {
 
   describe('buildCvApi4Command', () => {
     it('should build correct API4 command', () => {
-      const command = client['buildCvApi4Command']('Contact', 'get', {
+      const command = client.buildCvApi4Command('Contact', 'get', {
         select: ['id', 'display_name'],
         limit: 10
       })
